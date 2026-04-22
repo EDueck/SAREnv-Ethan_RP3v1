@@ -1,43 +1,50 @@
+"""
+Execution script demonstrating the deserialization of operational terrain data,
+followed by the spatial rendering of probability, topology, and hazard matrices.
+"""
 from sarenv import (
     DatasetLoader,
     get_logger,
     visualize_heatmap,
     visualize_features,
 )
+from sarenv.utils.plot import visualize_risk_map
 
 log = get_logger()
 
 
 def run_loading_example():
     """
-    An example function demonstrating how to load and visualize a single dataset.
+    Executes the data management framework to allocate a localized environment constraint,
+    subsequently triggering the visualization suite to render the operational arrays.
     """
-    log.info("--- Starting Single Dataset Loading and Visualization Example ---")
+    log.info("Initiating dataset deserialization and spatial rendering sequence.")
 
-    dataset_dir = "sarenv_dataset/19"
-    size_to_load = "xlarge"
+    dataset_dir = "sarenv_dataset/1"
+    size_to_load = "medium"
 
     try:
         loader = DatasetLoader(dataset_directory=dataset_dir)
-        log.info(f"Loading data for size: '{size_to_load}'")
+        log.info(f"Extracting spatial matrices for operational constraint: '{size_to_load}'")
         item = loader.load_environment(size_to_load)
 
         if item:
-            # INSERT YOUR CODE HERE OR USE THE PROVIDED FUNCTIONS
+            # Executes the spatial visualization suite against the populated dataset
             visualize_heatmap(item, plot_basemap=False, plot_inset=True)
             visualize_features(item, plot_basemap=False, plot_inset=True, num_lost_persons=300)
+            visualize_risk_map(item, plot_basemap=False, plot_inset=True)
         else:
-            log.error(f"Could not load the specified size: '{size_to_load}'")
+            log.error(f"Execution failure: Spatial constraint '{size_to_load}' could not be resolved.")
 
     except FileNotFoundError:
         log.error(
-            f"Error: The dataset directory '{dataset_dir}' or its master files were not found."
+            f"Directory mapping failed: Target dataset '{dataset_dir}' is inaccessible."
         )
         log.error(
-            "Please run the `export_dataset()` method from the DataGenerator first."
+            "Master topology serialization via DataGenerator.export_dataset() must precede this execution."
         )
     except Exception as e:
-        log.error(f"An unexpected error occurred: {e}", exc_info=True)
+        log.error(f"Catastrophic failure during environment deserialization: {e}", exc_info=True)
 
 
 if __name__ == "__main__":
